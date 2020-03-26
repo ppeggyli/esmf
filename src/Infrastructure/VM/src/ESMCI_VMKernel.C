@@ -3039,14 +3039,14 @@ void VMK::epochFinal(){
   // loop over the sendMap and wait for outstanding comms
   std::map<int, sendBuffer>:: iterator its;
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
-    sendBuffer *sm = &(its->second);
+    sendBuffer &sm = its->second;
 #ifdef USE_STRSTREAM
-    void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
-    int size = sm->stream.pcount();           // bytes in stream buffer
-    sm->stream.freeze(false); // unfreeze the persistent buffer for deallocation
+    void *buffer = (void *)sm.stream.str();  // access the buffer -> freeze
+    int size = sm.stream.pcount();           // bytes in stream buffer
+    sm.stream.freeze(false); // unfreeze the persistent buffer for deallocation
 #else
-    void *buffer = (void *)sm->streamBuffer.data();
-    int size = sm->streamBuffer.size();       // bytes in stream buffer
+    void *buffer = (void *)sm.streamBuffer.data();
+    int size = sm.streamBuffer.size();       // bytes in stream buffer
 #endif
 #ifdef VM_EPOCHLOG_on
     std::stringstream msg;
@@ -3055,7 +3055,7 @@ void VMK::epochFinal(){
     << " buffer=" << buffer;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
-    sm->clear();
+    sm.clear();
   }
 }
 
@@ -3066,11 +3066,11 @@ void VMK::epochExit(bool keepAlloc){
     // loop over the sendMap and post non-blocking sends
     std::map<int, sendBuffer>:: iterator its;
     for (its=sendMap.begin(); its!=sendMap.end(); ++its){
-      sendBuffer *sm = &(its->second);
+      sendBuffer &sm = its->second;
       int tag = getDefaultTag(mypet,its->first);
 #ifdef USE_STRSTREAM
-      void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
-      int size = sm->stream.pcount();           // bytes in stream buffer
+      void *buffer = (void *)sm.stream.str();  // access the buffer -> freeze
+      int size = sm.stream.pcount();           // bytes in stream buffer
       if (size > 0){
 #ifdef VM_EPOCHLOG_on
         std::stringstream msg;
@@ -3080,23 +3080,23 @@ void VMK::epochExit(bool keepAlloc){
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
         MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
-          &sm->mpireq);
-        sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
+          &(sm.mpireq));
+        sm.stream.seekp(0);  // reset stream to the beginning (not affect buff)
       }
 #else
-      sm->streamBuffer = sm->stream.str();  // copy data into persistent buffer
-      sm->stream.str("");                   // clear out stream
+      sm.streamBuffer = sm.stream.str();  // copy data into persistent buffer
+      sm.stream.str("");                   // clear out stream
 #ifdef VM_EPOCHLOG_on
-      if (sm->streamBuffer.size() > 0){
+      if (sm.streamBuffer.size() > 0){
         std::stringstream msg;
         msg << "epochBuffer:" << __LINE__ << " ready to post non-blocking send:"
         << " dst=" << getVas(lpid[its->first]) 
-        << " size=" << sm->streamBuffer.size()
-        << " buffer=" << (void *)sm->streamBuffer.data();
+        << " size=" << sm.streamBuffer.size()
+        << " buffer=" << (void *)sm.streamBuffer.data();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
-        MPI_Isend((void *)sm->streamBuffer.data(), sm->streamBuffer.size(),
-          MPI_BYTE, lpid[its->first], tag, mpi_c, &sm->mpireq);
+        MPI_Isend((void *)sm.streamBuffer.data(), sm.streamBuffer.size(),
+          MPI_BYTE, lpid[its->first], tag, mpi_c, &(sm.mpireq));
       }
 #endif
     }
@@ -3330,23 +3330,23 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
   case VM_COMM_TYPE_MPI1:
     if (tag == -1) tag = getDefaultTag(mypet,dest);
     if (epoch==epochBuffer){
-      sendBuffer *sm = &(sendMap[dest]);
+      sendBuffer &sm = sendMap[dest];
 #ifdef VM_EPOCHLOG_on
       std::stringstream msg;
       msg << "epochBuffer:" << __LINE__ << " non-blocking send" << 
-      " firstFlag=" << sm->firstFlag <<
+      " firstFlag=" << sm.firstFlag <<
       " msg size=" << size;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
-      if (sm->firstFlag){
+      if (sm.firstFlag){
         // deal with the first actions here
-        sm->firstFlag = false;  // reset the flag
-        sm->clear();  // wait for outstanding comm and clear out.
+        sm.firstFlag = false;  // reset the flag
+        sm.clear();  // wait for outstanding comm and clear out.
       }
       // append the message into the epoch buffer stream
-      append(sm->stream, size);
-      append(sm->stream, tag);
-      sm->stream.write((const char*)message, size);
+      append(sm.stream, size);
+      append(sm.stream, tag);
+      sm.stream.write((const char*)message, size);
     }else{
       (*ch)->nelements=1;
       (*ch)->type=1;          // MPI
@@ -3657,17 +3657,17 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
     if (tag == -1) tag = getDefaultTag(source,mypet);
     else if (tag == VM_ANY_TAG) tag = MPI_ANY_TAG;
     if (epoch==epochBuffer){
-      recvBuffer *rm = &(recvMap[source]);
+      recvBuffer &rm = recvMap[source];
 #ifdef VM_EPOCHLOG_on
       std::stringstream msg;
       msg << "epochBuffer:" << __LINE__ << " non-blocking recv" << 
-      " firstFlag=" << rm->firstFlag <<
+      " firstFlag=" << rm.firstFlag <<
       " size=" << size;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
-      if (rm->firstFlag){
+      if (rm.firstFlag){
         // deal with the first actions here
-        rm->firstFlag = false;  // reset the flag
+        rm.firstFlag = false;  // reset the flag
         // query the message size with probe
 #ifdef VM_EPOCHLOG_on
         std::stringstream msg;
@@ -3682,23 +3682,23 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         int bytecount;
         MPI_Get_count(&mpistat, MPI_BYTE, &bytecount);
         
-        rm->streamBuffer.resize(bytecount);
-        rm->buffer = (void *)rm->streamBuffer.data();
+        rm.streamBuffer.resize(bytecount);
+        rm.buffer = (void *)rm.streamBuffer.data();
         
         // post blocking recv of the enire epoch buffer
 #ifdef VM_EPOCHLOG_on
         msg.str(""); // clear
         msg << "epochBuffer:" << __LINE__ << " ready to post blocking recv:"
         << " src=" << getVas(lpid[source])
-        << " size=" << rm->streamBuffer.size()
-        << " streamBuffer=" << (void *)rm->streamBuffer.data();
+        << " size=" << rm.streamBuffer.size()
+        << " streamBuffer=" << (void *)rm.streamBuffer.data();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif
-        MPI_Recv(rm->buffer, bytecount, MPI_BYTE,
+        MPI_Recv(rm.buffer, bytecount, MPI_BYTE,
           lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
       }
       // now service the specific receive call with chunk of data from buffer
-      int *ip = (int *)rm->buffer;
+      int *ip = (int *)rm.buffer;
       int chunkSize = *ip++;
       int chunkTag = *ip++;
       char *cp = (char *)ip;
@@ -3706,7 +3706,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
 #ifdef VM_EPOCHLOG_on
       msg.str(""); // clear
       msg << "epochBuffer:" << __LINE__ << " processing recv chunk:"
-      << " buffer=" << rm->buffer
+      << " buffer=" << rm.buffer
       << " chunkSize=" << chunkSize << " chunkTag=" << chunkTag;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 #endif      
@@ -3721,7 +3721,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         return localrc;
       }
       memcpy(message, cp, size);
-      rm->buffer = (void *)(cp+chunkSize);  // next chunk in buffer
+      rm.buffer = (void *)(cp+chunkSize);  // next chunk in buffer
     }else{
       (*ch)->nelements=1;
       (*ch)->type=1;          // MPI
