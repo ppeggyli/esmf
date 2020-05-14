@@ -2257,15 +2257,13 @@ module NUOPC_Driver
     if (associated(petList)) then
       ! use the petList to restrict the number of PETs across which the
       ! update is synchronizing
-      call ESMF_AttributeUpdate(comp, vm, &
-        rootList=petList(1:1), petList=petList, reconcile=.true., rc=rc)
+      call ESMF_AttributeUpdate(comp, vm, rootList=petList(1:1), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     else
       ! no petList was specified -> update across all PETs
-      call ESMF_AttributeUpdate(comp, vm, &
-        rootList=(/0/), reconcile=.true., rc=rc)
+      call ESMF_AttributeUpdate(comp, vm, rootList=(/0/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
