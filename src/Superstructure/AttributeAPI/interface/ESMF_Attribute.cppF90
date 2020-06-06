@@ -54,6 +54,8 @@ module ESMF_AttributeMod
 !
 !------------------------------------------------------------------------------
 ! !USES:
+  use iso_c_binding
+  
   use ESMF_BaseMod
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
@@ -928,6 +930,145 @@ module ESMF_AttributeMod
 
 !
 !------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+  interface
+
+    subroutine c_ESMC_AttributeSetValue(arg1, arg2, arg3, arg4, arg5, arg6)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6
+    end subroutine
+
+    subroutine c_ESMC_AttPackSetValue(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7, arg8)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8
+    end subroutine
+
+    subroutine c_ESMC_AttPackRemove(arg1, arg2, arg3)
+      type(*), dimension(..) :: arg1, arg2, arg3
+    end subroutine
+
+    subroutine c_ESMC_AttributeGetValue(arg1, arg2, arg3, arg4, arg5, arg6)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6
+    end subroutine
+
+    subroutine c_ESMC_AttPackGetValue(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7, arg8)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8
+    end subroutine
+
+    subroutine c_ESMC_AttributeWrite(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7
+    end subroutine
+    
+    subroutine c_ESMC_AttPackSetCharList(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7, arg8, arg9)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9
+    end subroutine
+
+    subroutine c_ESMC_AttributeSetCharList(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7
+    end subroutine
+    
+    subroutine c_ESMC_AttPackRemoveAttribute(arg1, arg2, arg3, arg4, arg5)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5
+    end subroutine
+
+    subroutine c_ESMC_AttributeRemove(arg1, arg2, arg3)
+      type(*), dimension(..) :: arg1, arg2, arg3
+    end subroutine
+    
+    subroutine c_ESMC_AttPackIsPresentIndex(arg1, arg2, arg3, arg4, arg5)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5
+    end subroutine
+    
+    subroutine c_ESMC_AttPackGetInfoNum(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7, arg8)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8
+    end subroutine
+
+    subroutine c_ESMC_AttributeIsPresentIndex(arg1, arg2, arg3, arg4)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4
+    end subroutine
+    
+    subroutine c_ESMC_AttributeGetInfoNum(arg1, arg2, arg3, arg4, arg5, arg6)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6
+    end subroutine
+
+    subroutine c_ESMC_AttPackIsPresentAtt(arg1, arg2, arg3, arg4, arg5)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5
+    end subroutine
+    
+    subroutine c_ESMC_AttPackGetInfoName(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7
+    end subroutine
+    
+    subroutine c_ESMC_AttributeIsPresent(arg1, arg2, arg3, arg4)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4
+    end subroutine
+    
+    subroutine c_ESMC_AttributeGetInfoName(arg1, arg2, arg3, arg4, arg5)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5
+    end subroutine
+    
+    subroutine c_ESMC_AttributeGetCount(arg1, arg2, arg3, arg4)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4
+    end subroutine
+    
+    subroutine c_ESMC_AttPackGetCharList(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7, arg8, arg9)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9
+    end subroutine
+
+    subroutine c_ESMC_AttributeGetCharList(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7
+    end subroutine
+
+    subroutine c_ESMC_AttPackCreateCustom(arg1, arg2, arg3, arg4, arg5, arg6)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6
+    end subroutine
+
+    subroutine c_ESMC_AttPackNest(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7, arg8, arg9, arg10)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10
+    end subroutine
+
+    subroutine c_ESMC_AttPackAddAttribute(arg1, arg2, arg3, arg4, arg5, arg6)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6
+    end subroutine
+    
+    subroutine c_ESMC_AttPackGet(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7, arg8)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8
+    end subroutine
+
+    subroutine c_ESMC_AttributeRead(arg1, arg2, arg3, arg4, arg5, arg6)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6
+    end subroutine
+    
+    subroutine c_ESMC_AttPackCreateStandard(arg1, arg2, arg3, arg4, arg5)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5
+    end subroutine
+
+    subroutine c_ESMC_AttributeUpdate(arg1, arg2, arg3, arg4, arg5, arg6, &
+      arg7)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4, arg5, arg6, arg7
+    end subroutine
+
+    subroutine c_ESMC_AttributeCopy(arg1, arg2, arg3, arg4)
+      type(*), dimension(..) :: arg1, arg2, arg3, arg4
+    end subroutine
+    
+  end interface
+
+!------------------------------------------------------------------------------
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -10435,7 +10576,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackRemove(mthisfield, attpackobj, lattnestflag, localrc) @\
+        call c_ESMC_AttPackRemove(mthisfield, attpackobj, localrc) @\
         ESMF_INIT_SET_DELETED(attpackobj) @\
       else if (attpack == ESMF_TRUE .and. present(name)) then @\
         call mclass##AttGetAttPack(mthis, & @\

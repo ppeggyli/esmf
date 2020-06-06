@@ -44,6 +44,7 @@ module ESMF_FortranWordsizeMod
 
   public ESMF_FortranUDTPointerSize
   public ESMF_FortranWordsize
+  public ESMF_PointerDifference
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -58,6 +59,24 @@ module ESMF_FortranWordsizeMod
 !EOPI
   end interface
   
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_PointerDifference -- Generic interface for C implemented
+!
+! !INTERFACE:
+
+  interface
+
+    subroutine esmf_pointerdifference(n, s1, s2, len)
+      integer*8 :: n
+      type(*) :: s1
+      type(*) :: s2
+      integer :: len
+    end subroutine
+
+!EOPI
+  end interface
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

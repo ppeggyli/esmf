@@ -35,6 +35,8 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod           ! ESMF utility types
   use ESMF_InitMacrosMod          ! ESMF initializer macros
   use ESMF_BaseMod                ! ESMF base class
@@ -293,6 +295,8 @@ module ESMF_RHandleMod
   public ESMF_RouteHandleOptimize
 
   public ESMF_RouteHandleCopyThis
+  
+  public c_ESMC_RouteHandleSetDynSrcMask, c_ESMC_RouteHandleSetDynDstMask
  
 !EOPI
 !------------------------------------------------------------------------------
@@ -323,6 +327,29 @@ module ESMF_RHandleMod
     module procedure ESMF_RouteHandleSetP
     module procedure ESMF_RouteHandleSetI
   end interface
+
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+  interface
+
+    subroutine c_ESMC_RouteHandleSetDynSrcMask(routehandle, value, rc)
+      import                :: ESMF_RouteHandle
+      type(ESMF_RouteHandle):: routehandle
+      type(*)               :: value
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_RouteHandleSetDynDstMask(routehandle, value, rc)
+      import                :: ESMF_RouteHandle
+      type(ESMF_RouteHandle):: routehandle
+      type(*)               :: value
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+!------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1436,7 +1463,7 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
 
   ! access the dynamicMaskState that is stored inside the Routehandle
   nullify(dynamicMaskState%wrap)
-  call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskState, localrc)
+  call c_ESMC_RouteHandleGetASR8R8R8(routehandle, dynamicMaskState, localrc)
   if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
     ESMF_CONTEXT, rcToReturn=rc)) return
   
@@ -1514,7 +1541,7 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
   else if (dynamicMaskState%wrap%typeKey == "R8R8R8V") then
     ! vector version -> use correct variables
     nullify(dynamicMaskStateV%wrap)
-    call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskStateV, localrc)
+    call c_ESMC_RouteHandleGetASR8R8R8V(routehandle, dynamicMaskStateV, localrc)
     if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
       ESMF_CONTEXT, rcToReturn=rc)) return
     ! prepare the dynamicMaskListV
@@ -1618,7 +1645,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
 
   ! access the dynamicMaskState that is stored inside the Routehandle
   nullify(dynamicMaskState%wrap)
-  call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskState, localrc)
+  call c_ESMC_RouteHandleGetASR4R8R4(routehandle, dynamicMaskState, localrc)
   if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
     ESMF_CONTEXT, rcToReturn=rc)) return
   
@@ -1695,7 +1722,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
   else if (dynamicMaskState%wrap%typeKey == "R4R8R4V") then
     ! vector version -> use correct variables
     nullify(dynamicMaskStateV%wrap)
-    call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskStateV, localrc)
+    call c_ESMC_RouteHandleGetASR4R8R4V(routehandle, dynamicMaskStateV, localrc)
     if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
       ESMF_CONTEXT, rcToReturn=rc)) return
     ! prepare the dynamicMaskListV
@@ -1797,7 +1824,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
 
   ! access the dynamicMaskState that is stored inside the Routehandle
   nullify(dynamicMaskState%wrap)
-  call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskState, localrc)
+  call c_ESMC_RouteHandleGetASR4R4R4(routehandle, dynamicMaskState, localrc)
   if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
     ESMF_CONTEXT, rcToReturn=rc)) return
   
@@ -1874,7 +1901,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
   else if (dynamicMaskState%wrap%typeKey == "R4R4R4V") then
     ! vector version -> use correct variables
     nullify(dynamicMaskStateV%wrap)
-    call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskStateV, localrc)
+    call c_ESMC_RouteHandleGetASR4R4R4V(routehandle, dynamicMaskStateV, localrc)
     if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
       ESMF_CONTEXT, rcToReturn=rc)) return
     ! prepare the dynamicMaskListV

@@ -30,6 +30,8 @@ module ESMF_AttachMethodsMod
 !
 !
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod
   use ESMF_LogErrMod
   use ESMF_StateTypesMod
@@ -86,6 +88,35 @@ module ESMF_AttachMethodsMod
     module procedure ESMF_MethodGridCompRemove
     module procedure ESMF_MethodCplCompRemove
   end interface
+
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+  interface
+
+    subroutine c_ESMC_MethodTableExecute(table, label, index, object, &
+      userRc, rc)
+      type(*)               :: table
+      type(*)               :: label
+      integer               :: index
+      type(*)               :: object
+      integer               :: userRc, rc
+    end subroutine
+
+    subroutine c_ESMC_MethodTableExecuteEF(table, label, index, object, &
+      existflag, userRc, rc)
+      import                :: ESMF_Logical
+      type(*)               :: table
+      type(*)               :: label
+      integer               :: index
+      type(*)               :: object
+      type(ESMF_Logical)    :: existflag
+      integer               :: userRc, rc
+    end subroutine
+
+  end interface
+
+!------------------------------------------------------------------------------
 
 !==============================================================================
 

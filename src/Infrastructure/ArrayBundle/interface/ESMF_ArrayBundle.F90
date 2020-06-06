@@ -34,6 +34,8 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -305,6 +307,40 @@ module ESMF_ArrayBundleMod
   end interface
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+  interface
+
+    subroutine c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
+      routehandle, srcToDstTransposeMap, typekind, factor, rc)
+      import                :: ESMF_ArrayBundle, ESMF_RouteHandle
+      import                :: ESMF_InterArray, ESMF_TypeKind_Flag
+      type(ESMF_ArrayBundle):: srcArrayBundle, dstArrayBundle
+      type(ESMF_RouteHandle):: routehandle
+      type(ESMF_InterArray) :: srcToDstTransposeMap
+      type(ESMF_TypeKind_Flag):: typekind
+      type(*)               :: factor
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
+      routehandle, typekindFactors, factorList, factorListCount, &
+      factorIndexList, srcTermProcessing, rc)
+      import                :: ESMF_ArrayBundle, ESMF_RouteHandle
+      import                :: ESMF_TypeKind_Flag, ESMF_InterArray, ESMF_Logical
+      type(ESMF_ArrayBundle):: srcArrayBundle, dstArrayBundle
+      type(ESMF_RouteHandle):: routehandle
+      type(ESMF_TypeKind_Flag):: typekindFactors
+      type(*)               :: factorList(:)
+      integer               :: factorListCount
+      type(ESMF_InterArray) :: factorIndexList, srcTermProcessing
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+!------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

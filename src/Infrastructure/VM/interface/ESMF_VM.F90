@@ -33,6 +33,8 @@ module ESMF_VMMod
 !
 !------------------------------------------------------------------------------
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
@@ -93,6 +95,256 @@ module ESMF_VMMod
   interface ESMF_VMIdPrint
     module procedure ESMF_VMIdPrint_s
     module procedure ESMF_VMIdPrint_v
+  end interface
+
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+  interface
+  
+    subroutine c_ESMC_VMAllFullReduce(vm, input, output, count, dtk, op, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag, ESMF_Reduce_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: input
+      type(*)               :: output
+      integer               :: count
+      type(ESMF_TypeKind_Flag) :: dtk
+      type(ESMF_Reduce_Flag):: op
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllGather(vm, input, output, size, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: input
+      type(*),dimension(..) :: output
+      integer               :: size
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllGatherNB(vm, input, output, size, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: input
+      type(*),dimension(..) :: output
+      integer               :: size
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllGatherV(vm, sendData, sendCount, recvData, &
+      recvCounts, recvOffsets, dtk, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: sendData
+      integer               :: sendCount
+      type(*),dimension(..) :: recvData
+      integer               :: recvCounts, recvOffsets
+      type(ESMF_TypeKind_Flag) :: dtk
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllReduce(vm, input, output, count, dtk, op, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag, ESMF_Reduce_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: input
+      type(*)               :: output
+      integer               :: count
+      type(ESMF_TypeKind_Flag) :: dtk
+      type(ESMF_Reduce_Flag):: op
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllToAll(vm, sendData, sendCount, recvData, recvCount,&
+      dtk, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: sendData
+      integer               :: sendCount
+      type(*),dimension(..) :: recvData
+      integer               :: recvCount
+      type(ESMF_TypeKind_Flag) :: dtk
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMAllToAllV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCounts, recvOffsets, dtk, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: sendData
+      integer               :: sendCounts, sendOffsets
+      type(*),dimension(..) :: recvData
+      integer               :: recvCounts, recvOffsets
+      type(ESMF_TypeKind_Flag) :: dtk
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMBroadcast(vm, bcstData, size, root, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: bcstData
+      integer               :: size
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMBroadcastNB(vm, bcstData, size, root, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: bcstData
+      integer               :: size
+      integer               :: root
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMGather(vm, input, output, size, root, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: input
+      type(*),dimension(..) :: output
+      integer               :: size
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMGatherNB(vm, input, output, size, root, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: input
+      type(*),dimension(..) :: output
+      integer               :: size
+      integer               :: root
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, recvCounts, &
+      recvOffsets, dtk, root, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: sendData
+      integer               :: sendCount
+      type(*),dimension(..) :: recvData
+      integer               :: recvCounts, recvOffsets
+      type(ESMF_TypeKind_Flag) :: dtk
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMRecv(vm, recvData, recvSize, src, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: recvData
+      integer               :: recvSize
+      integer               :: src
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMRecvNB(vm, recvData, recvSize, src, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: recvData
+      integer               :: recvSize
+      integer               :: src
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMReduce(vm, input, output, count, dtk, op, root, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag, ESMF_Reduce_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: input
+      type(*)               :: output
+      integer               :: count
+      type(ESMF_TypeKind_Flag) :: dtk
+      type(ESMF_Reduce_Flag):: op
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMScatter(vm, input, output, size, root, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*)               :: input
+      type(*)               :: output
+      integer               :: size
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMScatterNB(vm, input, output, size, root, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*)               :: input
+      type(*)               :: output
+      integer               :: size
+      integer               :: root
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMScatterV(vm, sendData, sendCounts, sendOffsets, &
+      recvData, recvCount, dtk, root, rc)
+      import                :: ESMF_VM, ESMF_TypeKind_Flag
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData
+      integer               :: sendCounts, sendOffsets
+      type(*)               :: recvData
+      integer               :: recvCount
+      type(ESMF_TypeKind_Flag) :: dtk
+      integer               :: root
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMSend(vm, sendData, sendSize, dst, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: sendData
+      integer               :: sendSize
+      integer               :: dst
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMSendNB(vm, sendData, sendSize, dst, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*),dimension(..) :: sendData
+      integer               :: sendSize
+      integer               :: dst
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, recvData, &
+      recvSize, src, rc)
+      import                :: ESMF_VM
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData
+      integer               :: sendSize
+      integer               :: dst
+      type(*)               :: recvData
+      integer               :: recvSize
+      integer               :: src
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, recvData, &
+      recvSize, src, comm, rc)
+      import                :: ESMF_VM, ESMF_CommHandle
+      type(ESMF_VM)         :: vm
+      type(*)               :: sendData
+      integer               :: sendSize
+      integer               :: dst
+      type(*)               :: recvData
+      integer               :: recvSize
+      integer               :: src
+      type(ESMF_CommHandle) :: comm
+      integer               :: rc
+    end subroutine
+    
   end interface
 
 !------------------------------------------------------------------------------
@@ -5746,7 +5998,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -5818,7 +6071,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -5890,7 +6144,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -5962,7 +6217,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -6034,7 +6290,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData(1), size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -6106,7 +6363,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -6178,7 +6436,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, localrc)
+        call c_ESMC_VMRecvNB(vm, recvData, size, srcPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7308,7 +7567,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7379,7 +7639,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7451,7 +7712,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7523,7 +7785,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7595,7 +7858,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData(1), size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7667,7 +7931,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -7739,7 +8004,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, localrc)
+        call c_ESMC_VMSendNB(vm, sendData, size, dstPet, localcommhandle, &
+          localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
@@ -9628,10 +9894,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Call into the C++ interface
-    call c_ESMC_VMIdPrint(vmId, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    do i=1, size(vmId)
+      ! Call into the C++ interface
+      call c_ESMC_VMIdPrint(vmId(i), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
