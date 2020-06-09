@@ -25,7 +25,7 @@ script:
 #  - echo -en 'travis_fold:end:esmf_make'
 
 #  - echo 'ESMF make check...' && echo -en 'travis_fold:start:esmf_make_check'
-  - travis_wait 30 docker exec -t $TEST_RUNNER bash -c "make check > esmf-make-check.out 2>&1" && tail esmf-make-check.out
+#  - travis_wait 60 docker exec -t $TEST_RUNNER bash -c "make check > esmf-make-check.out 2>&1" && tail esmf-make-check.out
 #  - echo -en 'travis_fold:end:esmf_make_check'
 
 #  - echo 'ESMF make all_tests...' && echo -en 'travis_fold:start:esmf_make_all_tests'
