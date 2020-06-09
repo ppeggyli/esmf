@@ -3,8 +3,10 @@ language: python
 services:
   - docker
 
-#env:
-#  global:
+env:
+  global:
+    - TEST_RUNNER=esmf-runner
+    - DOCKER_NAME=bekozi/esmf-ci
 #  matrix:
 
 before_install:
@@ -13,30 +15,46 @@ before_install:
   - git checkout bekozi-exec-for-esmf #tdk:rm
 
 script:
-  - echo 'Docker build...' && echo -en 'travis_fold:start:docker_build\\r'
-  - docker build -t bekozi/esmf --file docker/esmf/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
-  - echo -en 'travis_fold:end:docker_build\\r'
+  - echo 'Docker build...' && echo -en 'travis_fold:start:docker_build'
+  - docker build -t $DOCKER_NAME --file docker/esmf/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
+  - echo -en 'travis_fold:end:docker_build'
 
-  - docker run -dit --name esmf-runner bekozi/esmf
+  - docker run -dit --name $TEST_RUNNER $DOCKER_NAME
 
-  - echo 'ESMF make info...' && echo -en 'travis_fold:start:esmf_make_info\\r'
-  - docker exec -t esmf-runner bash -c "make info 2>&1 | tee esmf-make-info.out"
-  - echo -en 'travis_fold:end:esmf_make_info\\r'
+  - echo 'ESMF make info...' && echo -en 'travis_fold:start:esmf_make_info'
+  - docker exec -t $TEST_RUNNER bash -c "make info 2>&1 2>&1 esmf-make-info.out"
+  - echo -en 'travis_fold:end:esmf_make_info'
 
-  - echo 'ESMF make...' && echo -en 'travis_fold:start:esmf_make\\r'
-  - docker exec -t esmf-runner bash -c "make 2>&1 | tee esmf-make.out"
-  - echo -en 'travis_fold:end:esmf_make\\r'
+  - echo 'ESMF make...' && echo -en 'travis_fold:start:esmf_make'
+  - docker exec -t $TEST_RUNNER bash -c "make 2>&1 esmf-make.out"
+  - echo -en 'travis_fold:end:esmf_make'
 
-  - echo 'ESMF make check...' && echo -en 'travis_fold:start:esmf_make_check\\r'
-  - docker exec -t esmf-runner bash -c "make check 2>&1 | tee esmf-make-check.out"
-  - echo -en 'travis_fold:end:esmf_make_check\\r'
+  - echo 'ESMF make check...' && echo -en 'travis_fold:start:esmf_make_check'
+  - docker exec -t $TEST_RUNNER bash -c "make check 2>&1 esmf-make-check.out"
+  - echo -en 'travis_fold:end:esmf_make_check'
 
-#  - echo 'ESMF make all_tests...' && echo -en 'travis_fold:start:esmf_make_all_tests\\r'
-#  - docker exec -t esmf-runner bash -c "make all_tests 2>&1 | tee esmf-make-all_tests.out"
-#  - echo -en 'travis_fold:end:esmf_make_all_tests\\r'
+#  - echo 'ESMF make all_tests...' && echo -en 'travis_fold:start:esmf_make_all_tests'
+#  - docker exec -t $TEST_RUNNER bash -c "make all_tests 2>&1 | tee esmf-make-all_tests.out"
+#  - echo -en 'travis_fold:end:esmf_make_all_tests'
 
-  - echo 'ESMF make install...' && echo -en 'travis_fold:start:esmf_make_install\\r'
-  - docker exec -t esmf-runner bash -c "make check 2>&1 | tee esmf-make-install.out"
-  - echo -en 'travis_fold:end:esmf_make_install\\r'
+  - echo 'ESMF make install...' && echo -en 'travis_fold:start:esmf_make_install'
+  - docker exec -t $TEST_RUNNER bash -c "make check 2>&1 esmf-make-install.out"
+  - echo -en 'travis_fold:end:esmf_make_install'
+
+  # ESMPy ---------------------------------------------------------------------
+
+  - echo 'ESMPy build...' && echo -en 'travis_fold:start:esmpy_build'
+  - docker exec -t $TEST_RUNNER bash -c "python setup.py build --ESMFMKFILE=${ESMFMKFILE} 2>&1 esmpy-build.out"
+  - echo -en 'travis_fold:end:esmpy_build'
+
+  - echo 'ESMPy test_all...' && echo -en 'travis_fold:start:esmpy_test_all'
+  - docker exec -t $TEST_RUNNER bash -c "python setup.py test_all 2>&1 esmpy-test_all.out"
+  - echo -en 'travis_fold:end:esmpy_test_all'
+
+  - echo 'ESMPy install...' && echo -en 'travis_fold:start:esmpy_install'
+  - docker exec -t $TEST_RUNNER bash -c "python setup.py install 2>&1 esmpy-install.out"
+  - echo -en 'travis_fold:end:esmpy_install'
+
+  # NUOPC Protos --------------------------------------------------------------
 
 #  - docker build -t bekozi/nuopc-protos  --file docker/nuopc-protos/Dockerfile .
