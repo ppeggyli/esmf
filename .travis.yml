@@ -16,7 +16,7 @@ before_install:
 
 script:
   - echo 'Docker build...' && echo -en 'travis_fold:start:docker_build'
-  - docker build -t $DOCKER_NAME --file docker/esmf/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
+  - docker build -t $DOCKER_NAME --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
   - echo -en 'travis_fold:end:docker_build'
 
   - docker run -dit --name $TEST_RUNNER $DOCKER_NAME
