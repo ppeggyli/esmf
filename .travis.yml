@@ -21,7 +21,7 @@ script:
   - echo -en 'travis_fold:end:esmf_make_info\\r'
 
 #  - echo 'ESMF make...' && echo -en 'travis_fold:start:esmf_make'
-  - travis_wait 30 docker exec -t $TEST_RUNNER bash -c "make > esmf-make.out 2>&1 && tail esmf-make.out"
+  - travis_wait 30 docker exec -t $TEST_RUNNER bash -c "make > esmf-make.out 2>&1; tail esmf-make.out"
 #  - echo -en 'travis_fold:end:esmf_make'
 
 #  - echo 'ESMF make check...' && echo -en 'travis_fold:start:esmf_make_check'
@@ -33,22 +33,24 @@ script:
 #  - echo -en 'travis_fold:end:esmf_make_all_tests'
 
 #  - echo 'ESMF make install...' && echo -en 'travis_fold:start:esmf_make_install'
-  - docker exec -t $TEST_RUNNER bash -c "make install > esmf-make-install.out 2>&1 && tail esmf-make-install.out"
+  - docker exec -t $TEST_RUNNER bash -c "make install > esmf-make-install.out 2>&1; tail esmf-make-install.out"
 #  - echo -en 'travis_fold:end:esmf_make_install'
 
   # ESMPy ---------------------------------------------------------------------
 
 #  - echo 'ESMPy build...' && echo -en 'travis_fold:start:esmpy_build'
-  - docker exec -t $TEST_RUNNER bash -c "python setup.py build --ESMFMKFILE=${ESMFMKFILE} > esmpy-build.out 2>&1 && tail esmpy-build.out"
+  - docker exec -t $TEST_RUNNER bash -c "python setup.py build --ESMFMKFILE=${ESMFMKFILE} > esmpy-build.out 2>&1; tail esmpy-build.out"
 #  - echo -en 'travis_fold:end:esmpy_build'
 
-#  - echo 'ESMPy test_all...' && echo -en 'travis_fold:start:esmpy_test_all'
-  - docker exec -t $TEST_RUNNER bash -c "python setup.py test_all > esmpy-test_all.out 2>&1 && tail esmpy-test_all.out"
-#  - echo -en 'travis_fold:end:esmpy_test_all'
+#  - echo 'ESMPy test...' && echo -en 'travis_fold:start:esmpy_test'
+  - docker exec -t $TEST_RUNNER bash -c "python setup.py test > esmpy-test.out 2>&1; tail esmpy-test.out"
+#  - echo -en 'travis_fold:end:esmpy_test'
 
 #  - echo 'ESMPy install...' && echo -en 'travis_fold:start:esmpy_install'
-  - docker exec -t $TEST_RUNNER bash -c "python setup.py install > esmpy-install.out 2>&1 && tail esmpy-install.out"
+  - docker exec -t $TEST_RUNNER bash -c "python setup.py install > esmpy-install.out 2>&1; tail esmpy-install.out"
 #  - echo -en 'travis_fold:end:esmpy_install'
+
+  - docker exec -t $TEST_RUNNER bash -c "python -c 'import ESMF'"
 
 #  - docker push ...
 
