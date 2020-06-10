@@ -45,7 +45,7 @@ script:
 #  - ESMFMKFILE=$(docker exec -t $TEST_RUNNER printenv ESMFMKFILE)
 #  - ESMPY_DIR=$(docker exec -t $TEST_RUNNER bash -c 'echo "$ESMPY_DIR"')
 #  - ESMPY_DIR=$(docker exec -t $TEST_RUNNER printenv ESMPY_DIR)
-  - docker exec -w $ESMPY_DIR -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmpy-build-test.sh"
+  - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmpy-build-test.sh"
 #  - docker exec -w $ESMPY_DIR -t $TEST_RUNNER bash -c "python setup.py build --ESMFMKFILE=$ESMFMKFILE > esmpy-build.out 2>&1"
 #  - docker exec -w $ESMPY_DIR -t $TEST_RUNNER bash -c "tail esmpy-build.out"
 #  - echo -en 'travis_fold:end:esmpy_build'
