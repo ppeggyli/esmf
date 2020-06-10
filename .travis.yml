@@ -39,15 +39,15 @@ script:
   # ESMPy ---------------------------------------------------------------------
 
 #  - echo 'ESMPy build...' && echo -en 'travis_fold:start:esmpy_build'
-  - docker exec -t $TEST_RUNNER bash -c "python setup.py build --ESMFMKFILE=${ESMFMKFILE} > esmpy-build.out 2>&1; tail esmpy-build.out"
+  - docker exec -t $TEST_RUNNER bash -c "cd $ESMPY_DIR && python setup.py build --ESMFMKFILE=${ESMFMKFILE} > esmpy-build.out 2>&1; cd $ESMPY_DIR && tail esmpy-build.out"
 #  - echo -en 'travis_fold:end:esmpy_build'
 
 #  - echo 'ESMPy test...' && echo -en 'travis_fold:start:esmpy_test'
-  - docker exec -t $TEST_RUNNER bash -c "python setup.py test > esmpy-test.out 2>&1; tail esmpy-test.out"
+  - docker exec -t $TEST_RUNNER bash -c "cd $ESMPY_DIR && python setup.py test > esmpy-test.out 2>&1; cd $ESMPY_DIR && tail esmpy-test.out"
 #  - echo -en 'travis_fold:end:esmpy_test'
 
 #  - echo 'ESMPy install...' && echo -en 'travis_fold:start:esmpy_install'
-  - docker exec -t $TEST_RUNNER bash -c "python setup.py install > esmpy-install.out 2>&1; tail esmpy-install.out"
+  - docker exec -t $TEST_RUNNER bash -c "cd $ESMPY_DIR && python setup.py install > esmpy-install.out 2>&1; cd $ESMPY_DIR && tail esmpy-install.out"
 #  - echo -en 'travis_fold:end:esmpy_install'
 
   - docker exec -t $TEST_RUNNER bash -c "python -c 'import ESMF'"
