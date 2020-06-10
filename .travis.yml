@@ -11,8 +11,8 @@ env:
 
 before_install:
   - git clone https://github.com/NESII/esmf-travis-ci.git
-  - git checkout bekozi-travis-ci #tdk:rm
   - cd esmf-travis-ci
+  - git checkout bekozi-travis-ci #tdk:rm
   - docker build -t $DOCKER_IMG --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
   - docker run -dit --name $TEST_RUNNER $DOCKER_IMG
 
