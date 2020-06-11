@@ -19,20 +19,21 @@ before_install:
 
 jobs:
   include:
+    - stage: Info
+      script: docker exec -t $TEST_RUNNER bash -c "make info 2>&1 | tee esmf-make-info.out"
     - stage: Build
-      script:
-        - echo 'ESMF make info...' && echo -en 'travis_fold:start:esmf_make_info\\r'
-        - docker exec -t $TEST_RUNNER bash -c "make info 2>&1 | tee esmf-make-info.out"
-        - echo -en 'travis_fold:end:esmf_make_info\\r'
-
-        - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
-    - stage: Test
-      name: "check"
+      script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
+    - stage: Make Targets
+#      script: sleep 5
       script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-check.sh"
-    - script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-all_tests.sh"
+      name: "check"
+    - script: sleep 5
+#    - script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-all_tests.sh"
       name: "all_tests"
-    - stage: Install
-      script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-install.sh"
+    - script: docker build -t bekozi/esmf-doc --file docker/esmf-doc/Dockerfile .
+      name: "doc"
+    - script: docker exec -t $TEST_RUNNER bash -c "make install 2>&1 | tee esmf-make-install.out"
+      name: "install"
 
 #  - echo 'ESMF make...' && echo -en 'travis_fold:start:esmf_make'
 #  - travis_wait 30 docker exec -t $TEST_RUNNER bash -c "make > esmf-make.out 2>&1; tail esmf-make.out"
