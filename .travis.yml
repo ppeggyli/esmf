@@ -21,7 +21,7 @@ script:
   - docker exec -t $TEST_RUNNER bash -c "make info 2>&1 | tee esmf-make-info.out"
   - echo -en 'travis_fold:end:esmf_make_info\\r'
 
-  - travis_wait 20 docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
+  - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
 
 #  - travis_wait 30 docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-check.sh"
 
