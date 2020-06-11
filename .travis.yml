@@ -12,10 +12,9 @@ env:
 before_install:
   - git clone https://github.com/NESII/esmf-travis-ci.git
   - cd esmf-travis-ci
-  - git checkout bekozi-travis-ci #tdk:rm
+  - git checkout $TRAVIS_BRANCH
   - docker build -t $DOCKER_IMG --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
   - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
-#tdk:todo: grep for esmf environment variables
 
 jobs:
   include:
@@ -24,14 +23,20 @@ jobs:
     - stage: Build
       script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
     - stage: Make Targets
-#      script: sleep 5
       script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-check.sh"
       name: "check"
-    - script: sleep 5
+    - script: exit 1 #tdk:rm
 #    - script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-all_tests.sh"
       name: "all_tests"
-    - script: docker build -t bekozi/esmf-ci-doc --file docker/esmf-ci-doc/Dockerfile .
+    - script: exit 1 #tdk:rm
+#    - script: docker build -t bekozi/esmf-ci-doc --file docker/esmf-ci-doc/Dockerfile .
       name: "doc"
+    - stage: Docker Finalize
+    - script:
+        - docker commit $TEST_RUNNER bekozi/esmf-ci:latest
+        - docker stop $TEST_RUNNER
+#        - docker push #tdk:todo
+
 
 #  - echo 'ESMF make...' && echo -en 'travis_fold:start:esmf_make'
 #  - travis_wait 30 docker exec -t $TEST_RUNNER bash -c "make > esmf-make.out 2>&1; tail esmf-make.out"
