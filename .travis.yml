@@ -30,7 +30,7 @@ jobs:
     - script: sleep 5
 #    - script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-all_tests.sh"
       name: "all_tests"
-    - script: docker build -t bekozi/esmf-doc --file docker/esmf-doc/Dockerfile .
+    - script: docker build -t bekozi/esmf-ci-doc --file docker/esmf-ci-doc/Dockerfile .
       name: "doc"
     - script: docker exec -t $TEST_RUNNER bash -c "make install 2>&1 | tee esmf-make-install.out"
       name: "install"
