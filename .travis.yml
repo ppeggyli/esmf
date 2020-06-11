@@ -14,7 +14,7 @@ before_install:
   - cd esmf-travis-ci
   - git checkout bekozi-travis-ci #tdk:rm
   - docker build -t $DOCKER_IMG --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
-  - docker run -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
+  - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
 #tdk:todo: grep for esmf environment variables
 
 jobs:
@@ -32,8 +32,6 @@ jobs:
       name: "all_tests"
     - script: docker build -t bekozi/esmf-ci-doc --file docker/esmf-ci-doc/Dockerfile .
       name: "doc"
-    - script: docker exec -t $TEST_RUNNER bash -c "make install 2>&1 | tee esmf-make-install.out"
-      name: "install"
 
 #  - echo 'ESMF make...' && echo -en 'travis_fold:start:esmf_make'
 #  - travis_wait 30 docker exec -t $TEST_RUNNER bash -c "make > esmf-make.out 2>&1; tail esmf-make.out"
