@@ -13,11 +13,13 @@ before_install:
   - git clone https://github.com/NESII/esmf-travis-ci.git
   - cd esmf-travis-ci
   - git checkout $TRAVIS_BRANCH
-  - docker build -t $DOCKER_IMG --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
-  - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
 
 jobs:
   include:
+    - stage: Docker Initialize
+      script:
+        - docker build -t $DOCKER_IMG --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
+        - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
     - stage: Info
       script: docker exec -t $TEST_RUNNER bash -c "make info 2>&1 | tee esmf-make-info.out"
     - stage: Build
@@ -32,7 +34,7 @@ jobs:
 #    - script: docker build -t bekozi/esmf-ci-doc --file docker/esmf-ci-doc/Dockerfile .
       name: "doc"
     - stage: Docker Finalize
-    - script:
+      script:
         - docker commit $TEST_RUNNER bekozi/esmf-ci:latest
         - docker stop $TEST_RUNNER
 #        - docker push #tdk:todo
