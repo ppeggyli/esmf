@@ -23,7 +23,7 @@ script:
 
   - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
 
-#  - travis_wait 30 docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-check.sh"
+  - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-check.sh"
 
   - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-install.sh"
 
