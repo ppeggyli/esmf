@@ -7,12 +7,19 @@ env:
   global:
     - TEST_RUNNER=esmf-runner
     - DOCKER_IMG=bekozi/esmf-ci
+    # include $HOME/.local/bin for 'aws'
+    - PATH=$HOME/.local/bin:$PATH
 #  matrix:
 
 before_install:
   - git clone https://github.com/NESII/esmf-travis-ci.git
   - cd esmf-travis-ci
   - git checkout $TRAVIS_BRANCH
+  # 'aws' configuration
+  - pip install -U pip
+  - pip install awscli
+  - mkdir -p ~/$TRAVIS_BUILD_NUMBER
+  - aws s3 sync s3://esmf-test-artifacts/$TRAVIS_BUILD_NUMBER ~/$TRAVIS_BUILD_NUMBER
 
 jobs:
   include:
@@ -22,6 +29,7 @@ jobs:
         - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
         - docker exec -t $TEST_RUNNER bash -c "make info 2>&1 | tee esmf-make-info.out"
         - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
+        - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-build_unit_tests.sh"
         - docker commit $TEST_RUNNER $DOCKER_IMG:$TRAVIS_BRANCH
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - docker push $DOCKER_IMG:$TRAVIS_BRANCH
