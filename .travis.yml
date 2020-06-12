@@ -18,6 +18,8 @@ before_install:
   # 'aws' configuration
   - pip install -U pip
   - pip install awscli
+  - aws configure set AWS_ACCESS_KEY $AWS_ACCESS_KEY
+  - aws configure set AWS_SECRET_KEY $AWS_SECRET_KEY
   - mkdir -p ~/$TRAVIS_BUILD_NUMBER
   - aws s3 sync s3://esmf-test-artifacts/$TRAVIS_BUILD_NUMBER ~/$TRAVIS_BUILD_NUMBER
 
