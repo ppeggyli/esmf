@@ -7,19 +7,18 @@ env:
   global:
     - TEST_RUNNER=esmf-runner
     - DOCKER_IMG=bekozi/esmf-ci
-    # include $HOME/.local/bin for 'aws'
-    - PATH=$HOME/.local/bin:$PATH
-#  matrix:
+    - PATH=$HOME/.local/bin:$PATH  # for 'aws'
 
 before_install:
   - git clone https://github.com/NESII/esmf-travis-ci.git
   - cd esmf-travis-ci
   - git checkout $TRAVIS_BRANCH
+  -
   # 'aws' configuration
 #  - pyenv global 3.7.1
-  - pip install -U pip
-  - pip install awscli
-  - mkdir -p ~/$TRAVIS_BUILD_NUMBER
+#  - pip install -U pip
+#  - pip install awscli
+#  - mkdir -p ~/$TRAVIS_BUILD_NUMBER
 #  - aws s3 sync s3://esmf-test-artifacts/$TRAVIS_BUILD_NUMBER ~/$TRAVIS_BUILD_NUMBER
 
 jobs:
