@@ -18,8 +18,8 @@ before_install:
   # 'aws' configuration
   - pip install -U pip
   - pip install awscli
-  - aws configure set aws_access_key $AWS_ACCESS_KEY
-  - aws configure set aws_secret_ey $AWS_SECRET_KEY
+  - aws configure set access_key $AWS_ACCESS_KEY
+  - aws configure set secret_key $AWS_SECRET_KEY
   - aws configure set region us-west-2
   - aws configure list
   - mkdir -p ~/$TRAVIS_BUILD_NUMBER
