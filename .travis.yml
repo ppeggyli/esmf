@@ -48,5 +48,6 @@ jobs:
     - script:
         - docker build -t bekozi/esmf-doc:$TRAVIS_BRANCH --file docker/esmf-doc/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - docker push bekozi/esmf-doc:$TRAVIS_BRANCH
+        - docker push bekozi/esmf-doc:$TRAVIS_BRANCH > docker-push.out
+        - tail -n 10 docker-push.out
       name: "doc"
