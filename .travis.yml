@@ -47,7 +47,7 @@ jobs:
         - bash sh/travis-run-make-target-stage.sh "run_examples"
       name: "run_examples"
     - script:
-        - docker build -q -t bekozi/esmf-ci-doc:$TRAVIS_BRANCH --file docker/esmf-ci-doc/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
-        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - docker push bekozi/esmf-ci-doc:$TRAVIS_BRANCH
+        - docker build -q -t bekozi/esmf-doc:$TRAVIS_BRANCH --file docker/esmf-doc/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
+#        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+#        - docker push bekozi/esmf-ci-doc:$TRAVIS_BRANCH
       name: "doc"
