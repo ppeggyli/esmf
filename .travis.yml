@@ -13,7 +13,7 @@ before_install:
   - git clone https://github.com/NESII/esmf-travis-ci.git
   - cd esmf-travis-ci
   - git checkout $TRAVIS_BRANCH
-  -
+
   # 'aws' configuration
 #  - pyenv global 3.7.1
 #  - pip install -U pip
@@ -25,16 +25,16 @@ jobs:
   include:
     - stage: Build
       script: exit 0
-#        - docker build -q -t $DOCKER_IMG --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
-#        - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
-#        - docker exec -t $TEST_RUNNER bash -c "make info 2>&1 | tee esmf-make-info.out"
-#        - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
-#        - bash sh/travis-finalize-stage.sh
+        - docker build -q -t $DOCKER_IMG --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
+        - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
+        - docker exec -t $TEST_RUNNER bash -c "make info 2>&1 | tee esmf-make-info.out"
+        - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
+        - bash sh/travis-finalize-stage.sh
     - stage: Build Unit Tests
       script: exit 0
-#        - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG:$TRAVIS_BRANCH
-#        - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-build_unit_tests.sh"
-#        - bash sh/travis-finalize-stage.sh
+        - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG:$TRAVIS_BRANCH
+        - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-build_unit_tests.sh"
+        - bash sh/travis-finalize-stage.sh
     - stage: Make Targets #tdk:todo: add summary step that will print failure if a test fails
       script:
         - bash sh/travis-run-make-target-stage.sh "run_unit_tests"
