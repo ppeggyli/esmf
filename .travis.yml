@@ -7,23 +7,29 @@ env:
   global:
     - TEST_RUNNER=esmf-runner
     - DOCKER_IMG=bekozi/esmf-ci
+    - DOCKER_TAG=current
 #  matrix:
 
 before_install:
   - git clone https://github.com/NESII/esmf-travis-ci.git
   - cd esmf-travis-ci
   - git checkout $TRAVIS_BRANCH
-  - docker build -t $DOCKER_IMG --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
-  - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
 
 jobs:
   include:
-    - stage: Info
-      script: docker exec -t $TEST_RUNNER bash -c "make info 2>&1 | tee esmf-make-info.out"
     - stage: Build
-      script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
+      script:
+        - docker build -t $DOCKER_IMG --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
+        - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
+        - docker exec -t $TEST_RUNNER bash -c "make info 2>&1 | tee esmf-make-info.out"
+        - docker commit $TEST_RUNNER $DOCKER_IMG:$DOCKER_TAG
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker push $DOCKER_IMG:$DOCKER_TAG
+        - docker stop $TEST_RUNNER
+#      script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
     - stage: Make Targets
-      script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-check.sh"
+      script: exit 1 #tdk:rm
+#      script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-check.sh"
       name: "check"
     - script: exit 1 #tdk:rm
 #    - script: docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-all_tests.sh"
@@ -31,10 +37,10 @@ jobs:
     - script: exit 1 #tdk:rm
 #    - script: docker build -t bekozi/esmf-ci-doc --file docker/esmf-ci-doc/Dockerfile .
       name: "doc"
-    - stage: Docker Finalize
-      script:
-        - docker commit $TEST_RUNNER bekozi/esmf-ci:latest
-        - docker stop $TEST_RUNNER
+#    - stage: Docker Finalize
+#      script:
+#        - docker commit $TEST_RUNNER bekozi/esmf-ci:latest
+#        - docker stop $TEST_RUNNER
 #        - docker push #tdk:todo
 
 
