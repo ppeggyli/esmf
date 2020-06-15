@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2020, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -53,7 +53,9 @@ namespace ESMCI {
   static void _calc_level_1_weights_from_CreepNode(CreepNode *cnode, std::vector<int>& wgt_ids, std::vector<double>& wgt_vals);
   static void _calc_level_gt1_weights_from_CreepNode(CreepNode *cnode, std::vector<int>& wgt_ids, std::vector<double>& wgt_vals);
 
-  // #define ESMF_REGRID_DEBUG_CREEP_NODE 7183
+  //#define ESMF_REGRID_DEBUG_CREEP_NODE 11377853
+
+  //int max_packed_buff_size=0;
 
   bool creep_debug=false;
 
@@ -383,6 +385,12 @@ namespace ESMCI {
         // If level >1, calc weights from the donor's weights
         _calc_level_gt1_weights_from_CreepNode(this, wgt_ids, wgt_vals);
       }
+
+      // Get rid of donors (because we've used them for everything we need them for)
+      // THIS ALSO HAS THE NICE EFFECT OF STOPPING THE PACKING AT ONE LEVEL OF DONORS
+      // INSTEAD OF IT RECURSING ALL THE WAY DOWN, SAVING MEMORY FOR THAT BUFFER
+      vector< vector<CreepNode *> >().swap(donors);
+
     }
 
     void add_weights_to_WMat(WMat &wts) {
@@ -489,6 +497,9 @@ namespace ESMCI {
 
     /// Loop connecting one level to nodes in the last one
     for (int l=1; l<num_creep_levels; l++) {
+
+
+      //printf("%d# Level %d Beg\n",Par::Rank(),l);
 
 
       // Propagate prev level info to other procs
@@ -651,6 +662,8 @@ namespace ESMCI {
 
       // } // num creep nodes in level l
       //} //  num_donor_levels - dl
+
+      //printf("%d# Level %d End\n",Par::Rank(),l);
     }
 
     // Loop through last level adding weights
@@ -669,6 +682,10 @@ namespace ESMCI {
     if (set_dst_status) {
       _convert_creep_levels_to_dst_status(num_creep_levels, creep_levels, dst_status);
     }
+
+    // DEBUG 
+    //  printf("%d# max packed buff size=%d\n",Par::Rank(),max_packed_buff_size);
+
 
     // Get rid of levels structure
     if (creep_levels != NULL) delete [] creep_levels;
@@ -991,23 +1008,26 @@ namespace ESMCI {
 
 //////////
 
-  static void _recursively_add_CreepNode_to_snd_lists(CreepNode *cnode, vector<UInt> &shared_procs, 
+// TODO:
+//  - MAKE send_procs a set, so not repeating things???
+
+  static void _recursively_add_CreepNode_to_snd_lists(CreepNode *cnode, UInt proc, 
                                          vector<CreepNode *> *snd_to_procs) {
     // Add current node
-    for (int p=0; p<shared_procs.size(); p++) {
-      snd_to_procs[shared_procs[p]].push_back(cnode);
-    }
+    snd_to_procs[proc].push_back(cnode);
 
     // Add donor nodes
     for (int dl=0; dl<cnode->donors.size(); dl++) {
       for (int d=0; d<cnode->donors[dl].size(); d++) {
         _recursively_add_CreepNode_to_snd_lists(cnode->donors[dl][d],
-                                                shared_procs, snd_to_procs);
+                                                proc, snd_to_procs);
       }
     }
-
   }
 
+
+
+/* XMRKX */
   static void _propagate_level_to_other_procs(Mesh &mesh, vector<CreepNode *> &level, map<int,CreepNode> &creep_map) {
 
     // Get number of procs
@@ -1022,11 +1042,20 @@ namespace ESMCI {
     // Allocate a vector for each proc
     snd_to_procs = new vector<CreepNode *>[num_procs];
 
+    //// Send from non-local copies to owned version ////
+
     // Loop through this level
     for (int i=0; i<level.size(); i++) {
 
       // Get creep node
       CreepNode *cnode=level[i];
+
+#ifdef ESMF_REGRID_DEBUG_CREEP_NODE
+      // DEBUG output
+      if (cnode->gid == ESMF_REGRID_DEBUG_CREEP_NODE) {
+        printf("%d# node id=%d no->o checking for send node ptr=%p \n",Par::Rank(),cnode->gid,cnode->node);
+      }
+#endif
 
       // Get mesh node
       MeshObj *node=cnode->node;
@@ -1034,31 +1063,28 @@ namespace ESMCI {
       // If null, then skip
       if (node == NULL) continue;
 
-      // If not local, then skip
-      if (!GetAttr(*node).is_locally_owned()) continue;
+#ifdef ESMF_REGRID_DEBUG_CREEP_NODE
+      // DEBUG output
+      if (cnode->gid == ESMF_REGRID_DEBUG_CREEP_NODE) {
+        printf("%d# node id=%d no->o checking for send local=%d shared=%d \n",Par::Rank(),cnode->gid,GetAttr(*node).is_locally_owned(),GetAttr(*node).is_shared());
+      }
+#endif
 
-      // If not shared, then skip
-      if (!GetAttr(*node).is_shared()) continue;
+      // Only sending non-local, so if local skip
+      if (GetAttr(*node).is_locally_owned()) continue;
 
-      // Figure out which other processors this node's information should be sent to
-      std::vector<UInt> shared_procs;
-      MeshObjConn::get_node_sharing(*node, mesh.GetSymNodeRel(), shared_procs);
+      // Get Owner
+      UInt owner=node->get_owner();
 
 #ifdef ESMF_REGRID_DEBUG_CREEP_NODE
       // DEBUG output
       if (node->get_id() == ESMF_REGRID_DEBUG_CREEP_NODE) {
-        printf("%d# node id=%d sending to pets= ",Par::Rank(),node->get_id());
-        for (int p=0; p<shared_procs.size(); p++) {
-          printf(" %d ",shared_procs[p]);
-        }
-        printf("\n");
-
+        printf("%d# node id=%d no->o sending to pets %d \n",Par::Rank(),node->get_id(),owner);
       }
 #endif
 
       // Add to send lists
-      _recursively_add_CreepNode_to_snd_lists(cnode, shared_procs, snd_to_procs);
-
+      _recursively_add_CreepNode_to_snd_lists(cnode, owner, snd_to_procs);
     }
 
 
@@ -1108,6 +1134,12 @@ namespace ESMCI {
     // Reset buffers
     comm.resetBuffers();
 
+    // Setup packed buff
+    int packed_buff_size=1; // init to some size
+    //    int packed_buff_size=2048; // init to some size
+    UChar *packed_buff=NULL;
+    packed_buff=new UChar[packed_buff_size];
+
 
     // Pack points into buffers
     for (int p=0; p<num_nonempty_procs; p++) {
@@ -1125,9 +1157,14 @@ namespace ESMCI {
         // get size
         UInt packed_size=cnode->packed_size();
 
+        // Expand packed buff if necessary
+        if (packed_size > packed_buff_size) {
+          packed_buff_size=packed_size;
+          if (packed_buff != NULL) delete[] packed_buff;
+          packed_buff=new UChar[packed_buff_size];
+        }
+
         // Pack 
-        // TODO: Allocate this to a max
-        UChar packed_buff[1024];
         cnode->pack(packed_buff);
 
         // Push buf onto send struct
@@ -1151,9 +1188,12 @@ namespace ESMCI {
         // Look at the buffer to figure out what size to unpack
         UInt packed_size=CreepNode::packed_size_from_buff((UChar *)(b->get_current()));
 
-        // Pop information out of buffer
-        // TODO: Allocate this to a max
-        UChar packed_buff[1024];
+        // Expand packed buff if necessary
+        if (packed_size > packed_buff_size) {
+          packed_buff_size=packed_size;
+          if (packed_buff != NULL) delete[] packed_buff;
+          packed_buff=new UChar[packed_buff_size];
+        }
 
         // Get one CreepNode's info out of buffer
         b->pop(packed_buff, packed_size);
@@ -1163,7 +1203,7 @@ namespace ESMCI {
 
 #ifdef ESMF_REGRID_DEBUG_CREEP_NODE
         if (gid == ESMF_REGRID_DEBUG_CREEP_NODE) {
-          printf("%d# node id=%d received \n",Par::Rank(),gid);
+          printf("%d# no->o node id=%d received \n",Par::Rank(),gid);
         }
 #endif
 
@@ -1173,7 +1213,7 @@ namespace ESMCI {
 
 #ifdef ESMF_REGRID_DEBUG_CREEP_NODE
         if (gid == ESMF_REGRID_DEBUG_CREEP_NODE) {
-          printf("%d# node id=%d making a new creep node \n",Par::Rank(),gid);
+          printf("%d# no->o node id=%d making a new creep node \n",Par::Rank(),gid);
         }
 #endif
 
@@ -1189,13 +1229,207 @@ namespace ESMCI {
       }
     }
 
+    //// Send from owned version to non-local copies ////
 
-    // Deallocate list
-    // TODO: move this out of this subroutine so allocate/deallocate doesn't
+    // Zero everything
+    for (int p=0; p<num_procs; p++) {
+      snd_to_procs[p].resize(0);
+    }
+
+    // Loop through this level
+    for (int i=0; i<level.size(); i++) {
+
+      // Get creep node
+      CreepNode *cnode=level[i];
+
+#ifdef ESMF_REGRID_DEBUG_CREEP_NODE
+      // DEBUG output
+      if (cnode->gid == ESMF_REGRID_DEBUG_CREEP_NODE) {
+        printf("%d# o->no node id=%d checking for send node ptr=%p \n",Par::Rank(),cnode->gid,cnode->node);
+      }
+#endif
+
+      // Get mesh node
+      MeshObj *node=cnode->node;
+
+      // If null, then skip
+      if (node == NULL) continue;
+
+#ifdef ESMF_REGRID_DEBUG_CREEP_NODE
+      // DEBUG output
+      if (cnode->gid == ESMF_REGRID_DEBUG_CREEP_NODE) {
+        printf("%d# o->no node id=%d checking for send local=%d shared=%d \n",Par::Rank(),cnode->gid,GetAttr(*node).is_locally_owned(),GetAttr(*node).is_shared());
+      }
+#endif
+
+      // If not local, then skip
+      if (!GetAttr(*node).is_locally_owned()) continue;
+
+      // If not shared, then skip
+      if (!GetAttr(*node).is_shared()) continue;
+
+      // Figure out which other processors this node's information should be sent to
+      std::vector<UInt> shared_procs;
+      MeshObjConn::get_node_sharing(*node, mesh.GetSymNodeRel(), shared_procs);
+
+#ifdef ESMF_REGRID_DEBUG_CREEP_NODE
+      // DEBUG output
+      if (node->get_id() == ESMF_REGRID_DEBUG_CREEP_NODE) {
+        printf("%d# o->no node id=%d sending to pets= ",Par::Rank(),node->get_id());
+        for (int p=0; p<shared_procs.size(); p++) {
+          printf(" %d ",shared_procs[p]);
+        }
+        printf("\n");
+
+      }
+#endif
+
+      // Add to send lists
+      for (int p=0; p<shared_procs.size(); p++) {
+        _recursively_add_CreepNode_to_snd_lists(cnode, shared_procs[p], snd_to_procs);
+      }
+    }
+
+
+    // Collapse to just non-empty lists
+    num_nonempty_procs=0;
+    for (int p=0; p<num_procs; p++) {
+      if (!snd_to_procs[p].empty()) num_nonempty_procs++;
+    }
+
+    // Get comm pattern information
+    snd_procs.resize(num_nonempty_procs);
+    snd_sizes.resize(num_nonempty_procs);
+
+    k=0;
+    for (int p=0; p<num_procs; p++) {
+      if (!snd_to_procs[p].empty()) {
+
+        // record proc
+        snd_procs[k]=(UInt)p;
+
+        // Calculate size
+        UInt size=0;
+        for (int i=0; i<snd_to_procs[p].size(); i++) {
+          size += snd_to_procs[p][i]->packed_size();
+        }
+        snd_sizes[k]=size;
+
+        // Next slot
+        k++;
+      }
+    }
+
+    // Setup pattern and sizes
+    if (num_nonempty_procs > 0) {
+      comm.setPattern(num_nonempty_procs, (const UInt *)&(snd_procs[0]));
+      comm.setSizes((UInt *)&(snd_sizes[0]));
+    } else {
+      comm.setPattern(0, (const UInt *)NULL);
+      comm.setSizes((UInt *)NULL);
+    }
+
+    // Reset buffers
+    comm.resetBuffers();
+
+    // Pack points into buffers
+    for (int p=0; p<num_nonempty_procs; p++) {
+      UInt proc=snd_procs[p];
+
+      // Get buffer for proc
+      SparseMsg:: buffer *b=comm.getSendBuffer(proc);
+
+      // Loop and pack CreepNodes into buffer
+      // Do it in reverse order so when unpacking donor
+      // nodes are unpacked first
+      for (int j=snd_to_procs[proc].size()-1; j>=0; j--) {
+        CreepNode *cnode=snd_to_procs[proc][j];
+
+        // get size
+        UInt packed_size=cnode->packed_size();
+
+        // Expand packed buff if necessary
+        if (packed_size > packed_buff_size) {
+          packed_buff_size=packed_size;
+          if (packed_buff != NULL) delete[] packed_buff;
+          packed_buff=new UChar[packed_buff_size];
+        }
+
+        // Pack 
+        cnode->pack(packed_buff);
+
+        // Push buf onto send struct
+        b->push(packed_buff, packed_size);
+      }
+    }
+
+    // Communicate information
+    comm.communicate();
+
+    // Go through received buffers and add creep nodes to structures
+    for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
+
+      // Get this procs buffer
+      UInt proc = *p;
+      SparseMsg::buffer *b = comm.getRecvBuffer(proc);
+
+      // Loop unpacking buffer until empty
+      while (!b->empty()) {
+
+        // Look at the buffer to figure out what size to unpack
+        UInt packed_size=CreepNode::packed_size_from_buff((UChar *)(b->get_current()));
+
+        // Expand packed buff if necessary
+        if (packed_size > packed_buff_size) {
+          packed_buff_size=packed_size;
+          if (packed_buff != NULL) delete[] packed_buff;
+          packed_buff=new UChar[packed_buff_size];
+        }
+
+        // Get one CreepNode's info out of buffer
+        b->pop(packed_buff, packed_size);
+
+        // Get gid
+        int gid=CreepNode::gid_from_buff(packed_buff);
+
+#ifdef ESMF_REGRID_DEBUG_CREEP_NODE
+        if (gid == ESMF_REGRID_DEBUG_CREEP_NODE) {
+          printf("%d# o->no node id=%d received \n",Par::Rank(),gid);
+        }
+#endif
+
+        // If it's already here, then skip
+        map<int,CreepNode>::iterator mi = creep_map.find(gid);
+        if (mi != creep_map.end()) continue;
+
+#ifdef ESMF_REGRID_DEBUG_CREEP_NODE
+        if (gid == ESMF_REGRID_DEBUG_CREEP_NODE) {
+          printf("%d# o->no node id=%d making a new creep node \n",Par::Rank(),gid);
+        }
+#endif
+
+        // Make new creep node
+        CreepNode tmp_cnode(packed_buff, mesh, creep_map);
+
+        // Add new creep node to map
+        std::pair< map<int,CreepNode>::iterator,bool> ret;
+        ret=creep_map.insert(std::pair<int,CreepNode>(gid, tmp_cnode));
+
+        // Add new creep node to level
+       level.push_back(&(ret.first->second));
+      }
+    }
+
+    // DEBUG: update max buff size 
+    //if (packed_buff_size > max_packed_buff_size) max_packed_buff_size=packed_buff_size;
+
+
+    // Deallocate memory
+    // TODO: move these out of this subroutine so allocate/deallocate doesn't
     //       happen every time
     if (snd_to_procs != NULL) delete [] snd_to_procs;
+    if (packed_buff != NULL) delete[] packed_buff;
   }
-
 
  static void _write_level(const char *filename, 
                            Mesh &mesh, vector<CreepNode *> &level) {
