@@ -1,3 +1,7 @@
+os:
+  - linux
+  - osx
+
 language: python
 
 services:
@@ -25,29 +29,32 @@ jobs:
   include:
     - stage: Build
       script:
-        - docker build -q -t $DOCKER_IMG --file docker/esmf-ci/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
-        - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG
-        - docker exec -t $TEST_RUNNER bash -c "make info 2>&1 | tee esmf-make-info.out"
-        - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make.sh"
-        - bash sh/travis-finalize-stage.sh
+        - exit 0
+#        - bash sh/travis/linux/build.sh
     - stage: Build Unit Tests
       script:
-        - docker run --cpus=$(nproc) -v $(pwd):/esmf-travis-ci -dit --name $TEST_RUNNER $DOCKER_IMG:$TRAVIS_BRANCH
-        - docker exec -t $TEST_RUNNER bash "/esmf-travis-ci/sh/esmf-make-build_unit_tests.sh"
-        - bash sh/travis-finalize-stage.sh
+        - exit 0
+#        - bash sh/travis/linux/build-unit-tests.sh
     - stage: Make Targets #tdk:todo: add summary step that will print failure if a test fails
       script:
-        - bash sh/travis-run-make-target-stage.sh "run_unit_tests"
+        - exit 0
+#        - bash sh/travis/linux/run-make-target-stage.sh "run_unit_tests"
       name: "run_unit_tests"
     - script:
-        - bash sh/travis-run-make-target-stage.sh "run_system_tests"
+        - exit 0
+#        - bash sh/travis/linux/run-make-target-stage.sh "run_system_tests"
       name: "run_system_tests"
     - script:
-        - bash sh/travis-run-make-target-stage.sh "run_examples"
+        - exit 0
+#        - bash sh/travis/linux/run-make-target-stage.sh "run_examples"
       name: "run_examples"
     - script:
-        - docker build -t bekozi/esmf-doc:$TRAVIS_BRANCH --file docker/esmf-doc/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
-        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - docker push bekozi/esmf-doc:$TRAVIS_BRANCH > docker-push.out
-        - tail -n 10 docker-push.out
+        - if [[ ${TRAVIS_OS_NAME} == "linux" ]]; then
+            docker build -t bekozi/esmf-doc:$TRAVIS_BRANCH --file docker/esmf-doc/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker push bekozi/esmf-doc:$TRAVIS_BRANCH > docker-push.out
+            tail -n 10 docker-push.out
+          else
+            echo "Docs built only on linux"
+          fi
       name: "doc"
