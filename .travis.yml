@@ -50,7 +50,7 @@ jobs:
 #        - bash sh/travis/linux/run-make-target-stage.sh "run_examples"
       name: "run_examples"
     - script:
-        - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+        - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
             docker build -t bekozi/esmf-doc:$TRAVIS_BRANCH --file docker/esmf-doc/Dockerfile --build-arg ESMF_BRANCH=$TRAVIS_BRANCH .
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
             docker push bekozi/esmf-doc:$TRAVIS_BRANCH > docker-push.out
