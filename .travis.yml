@@ -1,3 +1,5 @@
+language: python
+
 os:
   - linux
   - osx
@@ -15,16 +17,7 @@ before_install:
   - git clone https://github.com/NESII/esmf-travis-ci.git
   - cd esmf-travis-ci
   - git checkout $TRAVIS_BRANCH
-
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
-      bash miniconda.sh -b -p $HOME/miniconda;
-      source "$HOME/miniconda/etc/profile.d/conda.sh";
-      hash -r;
-      conda config --set always_yes yes --set changeps1 no;
-      conda update -q conda;
-      conda info -a;
-    fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then bash sh/travis/osx/install-conda.sh; fi
 
   # 'aws' configuration
 #  - pyenv global 3.7.1
