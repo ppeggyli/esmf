@@ -273,32 +273,32 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_routehandlesetasR8R8R8)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlesetasr8r8r8)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlesetas)(ptr, datap, rc);
   }
     
-  void FTN_X(c_esmc_routehandlesetasR8R8R8V)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlesetasr8r8r8v)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlesetas)(ptr, datap, rc);
   }
     
-  void FTN_X(c_esmc_routehandlesetasR4R8R4)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlesetasr4r8r4)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlesetas)(ptr, datap, rc);
   }
     
-  void FTN_X(c_esmc_routehandlesetasR4R8R4V)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlesetasr4r8r4v)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlesetas)(ptr, datap, rc);
   }
     
-  void FTN_X(c_esmc_routehandlesetasR4R4R4)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlesetasr4r4r4)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlesetas)(ptr, datap, rc);
   }
     
-  void FTN_X(c_esmc_routehandlesetasR4R4R4V)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlesetasr4r4r4v)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlesetas)(ptr, datap, rc);
   }
@@ -332,32 +332,32 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_routehandlegetasR8R8R8)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlegetasr8r8r8)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlegetas)(ptr, datap, rc);
   }
     
-  void FTN_X(c_esmc_routehandlegetasR8R8R8V)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlegetasr8r8r8v)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlegetas)(ptr, datap, rc);
   }
     
-  void FTN_X(c_esmc_routehandlegetasR4R8R4)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlegetasr4r8r4)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlegetas)(ptr, datap, rc);
   }
     
-  void FTN_X(c_esmc_routehandlegetasR4R8R4V)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlegetasr4r8r4v)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlegetas)(ptr, datap, rc);
   }
     
-  void FTN_X(c_esmc_routehandlegetasR4R4R4)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlegetasr4r4r4)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlegetas)(ptr, datap, rc);
   }
     
-  void FTN_X(c_esmc_routehandlegetasR4R4R4V)(ESMCI::RouteHandle **ptr,
+  void FTN_X(c_esmc_routehandlegetasr4r4r4v)(ESMCI::RouteHandle **ptr,
     void **datap, int *rc){
     FTN_X(c_esmc_routehandlegetas)(ptr, datap, rc);
   }
